@@ -81,13 +81,19 @@ export const bookService = {
   },
 
   async getBookItemCount(bookId: number) {
-    const count = await prisma.item.count({
+    const items = await prisma.item.findMany({
       where: { 
         book_id: bookId,
         deleted_at: null 
+      },
+      select: {
+        id: true
       }
     });
-    return { count };
+    return { 
+      count: items.length,
+      itemIds: items.map(item => item.id)
+    };
   },
 
   async addTag(bookId: number, tagId: number, userId: number) {

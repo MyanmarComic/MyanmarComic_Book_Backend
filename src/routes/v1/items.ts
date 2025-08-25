@@ -6,7 +6,7 @@ const router = Router();
 
 // Public routes
 router.get('/:id', itemController.getItemById);
-router.get('/books/:bookId/items', itemController.getBookItems);
+router.get('/:bookId/items', itemController.getBookItems);
 
 // Protected routes (require authentication)
 // router.use(authenticate);
