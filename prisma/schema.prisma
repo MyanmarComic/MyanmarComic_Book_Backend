@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Series {
+  id            Int       @id @default(autoincrement())
+  title         String    @db.VarChar(255)
+  description   String    @db.VarChar(2000)
+  likes         Int       @default(0)
+  views         Int       @default(0)
+  genere        String
+  status        String
+  episodes      Int       @default(0)
+  rating        Float     @default(0)
+  coverImageKey String? // S3 key for the cover image
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  published     Boolean   @default(true)
+  chapters      Chapter[]
+  Image         Image[]
+}
+
+model Image {
+  id         Int      @id @default(autoincrement())
+  s3Key      String // e.g. "series/1/2/page1.jpg"
+  url        String // e.g. "https://your-bucket.s3.amazonaws.com/series/1/2/page1.jpg"
+  seriesId   Int
+  chapterId  Int
+  uploadedAt DateTime @default(now())
+
+  // relations
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+}
+
+model Chapter {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(255)
+  chapterId Int
+  seriesId  Int
+  published Boolean  @default(true)
+  views     Int      @default(0) // Number of views for this chapter
+  series    Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           Int     @id @default(autoincrement())
+  username     String  @unique
+  password     String
+  refreshToken String? // nullable, as the user might not be logged in
+}

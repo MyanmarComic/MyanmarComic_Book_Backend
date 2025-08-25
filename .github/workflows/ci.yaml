@@ -1,0 +1,34 @@
+name: Deploy to Staging on Tag
+
+on:
+  push:
+    tags:
+      - 'v1.2.*' 
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            set -e
+
+            echo "Moving to project directory..."
+            cd ~/GitHub_Action
+
+            echo "Pulling latest staging code..."
+            git fetch --all
+            git pull
+
+            echo "Rebuilding and restarting app service only..."
+            docker compose down app
+            docker compose up --build -d app
+
+            echo "Done."
+            echo "Release"
