@@ -9,6 +9,8 @@ export const tagService = {
         name,
         created_by: userId,
         updated_by: userId,
+        created_at: new Date(),  // Add this line
+        updated_at: new Date()   // Add this line
       },
     });
   },

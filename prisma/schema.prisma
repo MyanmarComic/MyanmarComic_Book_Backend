@@ -61,3 +61,90 @@ model User {
   password     String
   refreshToken String? // nullable, as the user might not be logged in
 }
+
+model Category {
+  id                   Int      @id @default(autoincrement())
+  category_name        String   @db.VarChar(255)
+  category_cover       String   @db.Text
+  category_description String?  @db.Text
+  created_at           DateTime @default(now())
+  updated_at           DateTime
+  deleted_at           DateTime?
+  created_by           Int?
+  updated_by           Int?
+  deleted_by           Int?
+
+  books Book[]
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  image_link  String   @db.Text
+  description String?  @db.Text
+  total_items Int      @default(0)
+  author      String?  @db.VarChar(255)
+
+  category_id Int
+  category    Category @relation(fields: [category_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+  deleted_at  DateTime?
+  created_by  Int?
+  updated_by  Int?
+  deleted_by  Int?
+
+  items  Item[]
+  tags   BookTag[]
+
+  @@index([category_id], name: "Book_category_id_fkey")
+}
+
+model Item {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  image_link  String?  @db.Text
+  content     String?  @db.Text
+  author      String?  @db.VarChar(255)
+
+  book_id     Int
+  book        Book     @relation(fields: [book_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime
+  deleted_at  DateTime?
+  created_by  Int?
+  updated_by  Int?
+  deleted_by  Int?
+
+  @@index([book_id], name: "Item_book_id_fkey")
+}
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique @db.VarChar(100)
+  created_at DateTime @default(now())
+  updated_at DateTime
+  deleted_at DateTime?
+  created_by Int?
+  updated_by Int?
+  deleted_by Int?
+
+  books BookTag[]
+}
+
+// Explicit M:N because the join table has extra columns (assigned_at, assigned_by)
+model BookTag {
+  book_id     Int
+  tag_id      Int
+  assigned_at DateTime @default(now())
+  assigned_by Int?
+
+  book Book @relation(fields: [book_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  tag  Tag  @relation(fields: [tag_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@id([book_id, tag_id])
+  @@index([tag_id], name: "BookTag_tag_id_fkey")
+}
+  
